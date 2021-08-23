@@ -1,0 +1,209 @@
+DEBUT();
+
+MAIL=LIRE_MAILLAGE(UNITE=20,FORMAT='MED',);
+
+MAIL = MODI_MAILLAGE(reuse = MAIL,
+                    MAILLAGE = MAIL,
+                     ORIE_NORM_COQUE =(
+                                        _F(GROUP_MA = ('STRUC_2D',),)))                                                                   
+
+MAIL = DEFI_GROUP(reuse = MAIL, 
+                  MAILLAGE = MAIL, 
+                  CREA_GROUP_NO= _F(TOUT_GROUP_MA = 'OUI',)),
+#Steel
+ACIER=DEFI_MATERIAU(ELAS=_F(E=2.1E11,
+                            NU=0.3,
+                            RHO=7850,),);
+
+                            
+Model=AFFE_MODELE(AFFE=(
+                        _F(GROUP_MA=('STRUC_2D',),
+                              MODELISATION='DKT',
+                              PHENOMENE='MECANIQUE')),
+                     MAILLAGE=MAIL),
+
+
+#NOTE - the FLUI_STRU elements must be associated with a material (AIR)
+CHMAT=AFFE_MATERIAU(MAILLAGE=MAIL,
+                    MODELE=Model,
+                    AFFE=(_F(GROUP_MA=('STRUC_2D',),
+                             MATER=ACIER,),),);
+
+#1mm thick shell
+ShllProp=AFFE_CARA_ELEM(MODELE=Model,
+                        COQUE=_F(GROUP_MA=('STRUC_2D',),
+                                 EPAIS=0.05,
+                                 COEF_RIGI_DRZ=1e-05,),);
+
+TABL_MAS = POST_ELEM(CARA_ELEM=ShllProp,
+
+                     CHAM_MATER=CHMAT,
+
+                     MASS_INER=_F(GROUP_MA=('STRUC_2D',)),
+
+                     MODELE=Model),
+
+
+#~Simply Supported BCs
+BLOCAGE=AFFE_CHAR_MECA(DDL_IMPO=(_F(DRX=0.0,
+
+                                      DRY=0.0,
+
+                                      DRZ=0.0,
+
+                                      DX=0.0,
+
+                                      DY=0.0,
+
+                                      DZ=0.0,
+
+                                      GROUP_MA=('BOTTOM'))),
+                         PESANTEUR=_F(GRAVITE=9.81,
+                                      DIRECTION=(0,0,-1,),),
+                         MODELE=Model)
+                         
+
+ASSEMBLAGE(CARA_ELEM=ShllProp,
+
+           CHAM_MATER=CHMAT,
+
+           CHARGE=BLOCAGE,
+
+           MATR_ASSE=(_F(MATRICE=CO('MAT_K'),
+
+                         OPTION='RIGI_MECA'),
+
+                      _F(MATRICE=CO('MAT_M'),
+
+                         OPTION='MASS_MECA')),
+
+           MODELE=Model,
+
+           NUME_DDL=CO('NDDL'))
+
+f_table = INFO_MODE(MATR_RIGI = MAT_K, MATR_MASS = MAT_M, FREQ = (0,170)), 
+
+
+IMPR_TABLE(UNITE = 11, TABLE= f_table)
+IMPR_TABLE(UNITE = 12, TABLE= TABL_MAS)
+
+
+EMPTY_MO= CALC_MODES(OPTION = 'BANDE',
+                    CALC_FREQ=_F(FREQ=(0,150),
+                                 PREC_SHIFT = 5.E-3),
+
+                  # FILTRE_MODE=_F(CRIT_EXTR='MASS_EFFE_UN',
+
+                                #  SEUIL=1e-09),
+
+                   #IMPRESSION=_F(
+
+                    #             CUMUL = 'OUI',),
+
+                   MATR_MASS=MAT_M,
+
+                   MATR_RIGI=MAT_K,
+
+                   NORM_MODE=_F(INFO=1,
+
+                                NORME='MASS_GENE'),
+                   
+                   SOLVEUR_MODAL=_F(METHODE='SORENSEN'),
+                   VERI_MODE=_F(STOP_ERREUR='NON',
+
+                                STURM='NON'))
+
+
+
+numgen = NUME_DDL_GENE(BASE=EMPTY_MO,
+
+                       STOCKAGE='PLEIN')
+                       
+MACRO_MATR_AJOU(DDL_IMPO=_F(GROUP_NO='FREE_NO',
+
+                            PRES_FLUIDE=0.0),
+
+                FLUIDE=_F(RHO=1000.0),
+
+                GROUP_MA_FLUIDE='VOL',
+
+                GROUP_MA_INTERF=('STRUC_2D'),
+                MAILLAGE=MAIL,
+
+                MATR_MASS_AJOU=CO('MASS_FLU'),
+
+                MODELISATION='3D',
+
+                MODE_MECA=EMPTY_MO,
+
+                NUME_DDL_GENE=numgen)
+
+
+
+mgene = PROJ_MATR_BASE(BASE=EMPTY_MO,
+
+                       MATR_ASSE=MAT_M,
+
+                       NUME_DDL_GENE=numgen)
+
+
+
+riggen = PROJ_MATR_BASE(BASE=EMPTY_MO,
+
+                        MATR_ASSE=MAT_K,
+
+                        NUME_DDL_GENE=numgen)
+
+
+
+mastot = COMB_MATR_ASSE(COMB_R=(_F(COEF_R=1.0,
+
+                                   MATR_ASSE=MASS_FLU),
+
+                                _F(COEF_R=1.0,
+
+                                   MATR_ASSE=mgene)))
+
+
+
+FULL_MO = CALC_MODES(CALC_FREQ=_F(FREQ=(0,150)),
+                    
+                     MATR_MASS=mastot,
+
+                     MATR_RIGI=riggen,
+
+                     OPTION='BANDE')
+
+
+
+WET_MODE = REST_GENE_PHYS(
+
+                          RESU_GENE=FULL_MO,
+
+                          TOUT_CHAM='OUI')
+                          
+                         
+
+#Output results
+IMPR_RESU(FORMAT='MED',UNITE = 80,
+          RESU=_F(RESULTAT=EMPTY_MO,
+                  TOUT_CHAM='OUI',),);
+
+IMPR_RESU(FORMAT='RESULTAT',UNITE = 13,
+          RESU=(_F(RESULTAT=WET_MODE,
+                  NOM_PARA = ('FREQ',)),));
+                  
+IMPR_RESU(FORMAT='RESULTAT',UNITE = 14,
+          RESU=(_F(RESULTAT=EMPTY_MO,
+                NOM_PARA = ('FREQ',))));
+
+
+"""
+IMPR_CONCEPT(FORMAT='MED',
+          UNITE = 14,
+          CONCEPT=_F(CARA_ELEM=ShllProp,
+          REPERE_LOCAL='ELEM',
+          MODELE=Model,),);
+
+"""
+FIN();
