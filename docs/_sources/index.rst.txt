@@ -6,7 +6,13 @@
 Welcome to DeepMech's documentation!
 ====================================
 
-This page is under construction. 
+This site aims to provide case studies of finite element analysis, which will be in majority related to civil engineering applications. These examples will be carried out using some open-source features, such as, Code_Aster, Julia and Python. 
+
+This page is under developmment. If you wish to contact me, please reach out to barcelosenge@gmail.com 
+
+Best Regard, 
+
+Igor BARCELOS. 
 
 .. toctree::
    :maxdepth: 2
