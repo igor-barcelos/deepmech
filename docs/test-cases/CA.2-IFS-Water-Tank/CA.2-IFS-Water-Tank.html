@@ -1,0 +1,492 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Modal analysis of water tank &mdash; DeepMech  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Dome analysis : Pantheon of Rome" href="../CA.1-Pantheon-Rome/CA.1-Pantheon-Rome.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> DeepMech
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Content:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../CA.html">Code_Aster</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../CA.1-Pantheon-Rome/CA.1-Pantheon-Rome.html">Dome analysis : Pantheon of Rome</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Modal analysis of water tank</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-1">Example 1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geometry-and-mesh">Geometry and Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#properties-of-material">Properties of material</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reference-solution">Reference solution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fea-approach-code-aster">FEA Approach: Code_Aster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#results">Results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conclusions">Conclusions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#files">Files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DeepMech</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../CA.html">Code_Aster</a> &raquo;</li>
+        
+      <li>Modal analysis of water tank</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/test-cases/CA.2-IFS-Water-Tank/CA.2-IFS-Water-Tank.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="modal-analysis-of-water-tank">
+<h1>Modal analysis of water tank<a class="headerlink" href="#modal-analysis-of-water-tank" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This test calculates the wet modes of a water tank using the added mass concept. Example 1 is reproduction of the model presented in [1] which we can validate the .comm file and compare Code_Aster and Ansys results. Example 2 applies the same .comm file but in more complex geometry.</p>
+<p>The command file is based on FDLV114a.</p>
+</div>
+<div class="section" id="example-1">
+<h2>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h2>
+<p>A circular water tank with radius R = 2m, height H = 2m and constant thickness t = 0.05m is considered fully anchored to the ground. The below figure presents the finite element mesh and its groups.</p>
+<div class="section" id="geometry-and-mesh">
+<h3>Geometry and Mesh<a class="headerlink" href="#geometry-and-mesh" title="Permalink to this headline">¶</a></h3>
+<p>There are four mesh groups :</p>
+<ul class="simple">
+<li><p>‘VOL’, 3D mesh representing the whole volume, meaning the liquid.</p></li>
+<li><p>‘STRUC_2D’, 2D mesh representing the structure, meaning the tank and at the same time the contact surface between the structure and the liquid.</p></li>
+<li><p>‘BOTTOM’, 2D mesh representing the bottom of the tank.</p></li>
+<li><p>‘FREE_NO’, 2D mesh representing the free surface.</p></li>
+</ul>
+<div class="figure align-default">
+<img alt="../../_images/CA.2-mesh.png" src="../../_images/CA.2-mesh.png" />
+</div>
+</div>
+<div class="section" id="properties-of-material">
+<h3>Properties of material<a class="headerlink" href="#properties-of-material" title="Permalink to this headline">¶</a></h3>
+<p>The isotropic elastic material of the tank is characterized by the following properties:</p>
+<ul class="simple">
+<li><p>Young Modulus = 2.1E11 Pa</p></li>
+<li><p>Poisson’s ratio = 0.3</p></li>
+<li><p>Unit weight = 7850 kg/m3</p></li>
+</ul>
+<p>The tank contains water with unit weight equal to 1000 kg/m3</p>
+</div>
+<div class="section" id="boundary-conditions">
+<h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this headline">¶</a></h3>
+<p>It is assumed that the base of the tank is fully anchored to the ground ( DZ = DX = DY=0, DRX = DRZ = DRY =0 , GROUP_MA = ‘BOTTOM’) and zero pressure at the free surface ( PRES_FLUIDE = 0, GROUP_NO = ‘FREE_NO’)</p>
+</div>
+<div class="section" id="reference-solution">
+<h3>Reference solution<a class="headerlink" href="#reference-solution" title="Permalink to this headline">¶</a></h3>
+<p>Miloš Musil and Martin Sivý2 [1] provide the first five natural frequencies for cases of the full and empty tank calculated using Ansys.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Full Tank</p></th>
+<th class="head"><p>Empty Tank</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>63.765 Hz</p></td>
+<td><p>84.537 Hz</p></td>
+</tr>
+<tr class="row-odd"><td><p>72.901 Hz</p></td>
+<td><p>93.921 Hz</p></td>
+</tr>
+<tr class="row-even"><td><p>73.567 Hz</p></td>
+<td><p>101.51 Hz</p></td>
+</tr>
+<tr class="row-odd"><td><p>96.479 Hz</p></td>
+<td><p>121.66 Hz</p></td>
+</tr>
+<tr class="row-even"><td><p>101.79 Hz</p></td>
+<td><p>149.15 Hz</p></td>
+</tr>
+</tbody>
+</table>
+<p>We can also weight our empty model, such as the total mass m = (2*π*R*H + π*R²)*t*ρ = 1.48E4 kg</p>
+</div>
+<div class="section" id="fea-approach-code-aster">
+<h3>FEA Approach: Code_Aster<a class="headerlink" href="#fea-approach-code-aster" title="Permalink to this headline">¶</a></h3>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>fluide-struc2.comm</title>
+</head>
+<!-- Highlighting: "Code_Aster" -->
+<body>
+<pre style='font-weight:bold;color:#000000;background-color:#ffffff;'>
+<b><span style='color:#00aa00;'>#############################################</span></b>
+
+    <b><span style='color:#00aa00;'>#  CA.2 - IFS WATER TANK  # </span></b>
+
+<b><span style='color:#00aa00;'>############################################</span></b>
+
+
+
+<b><span style='color:#00aa00;'>#### READING MESH IN MED FORMAT #####</span></b>
+<b><span style='color:#0055ff;'>DEBUT</span></b>()<b>;</b>
+
+MAIL<b>=</b><b><span style='color:#0055ff;'>LIRE_MAILLAGE</span></b>(<b><span style='color:#0055ff;'>UNITE</span></b><b>=</b><b><span style='color:#b08000;'>20</span></b>,<b><span style='color:#0055ff;'>FORMAT</span></b><b>=</b><b><span style='color:#bf0303;'>'MED'</span></b>,)<b>;</b>
+
+MAIL <b>=</b> <b><span style='color:#0055ff;'>MODI_MAILLAGE</span></b>(<b><span style='color:#0055ff;'>reuse</span></b> <b>=</b> MAIL,
+                    <b><span style='color:#0055ff;'>MAILLAGE</span></b> <b>=</b> MAIL,
+                    ORIE_NORM_COQUE <b>=</b>(
+                                        <b>_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b> <b>=</b> (<b><span style='color:#bf0303;'>'STRUC_2D'</span></b>,),)))
+
+
+<b><span style='color:#00aa00;'>#### CREATING A MATERIAL ####                                        </span></b>
+ACIER<b>=</b><b><span style='color:#0055ff;'>DEFI_MATERIAU</span></b>(<b><span style='color:#0055ff;'>ELAS</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>E</span></b><b>=</b><b><span style='color:#b08000;'>2.1E11</span></b>,
+                            <b><span style='color:#0055ff;'>NU</span></b><b>=</b><b><span style='color:#b08000;'>0.3</span></b>,
+                            <b><span style='color:#0055ff;'>RHO</span></b><b>=</b><b><span style='color:#b08000;'>7850</span></b>,),)<b>;</b>
+
+<b><span style='color:#00aa00;'>#### CREATING A FE MODEL FOR THE EMPTY CASE #### -- NO FLUID IS MODEL HERE.                            </span></b>
+Model<b>=</b><b><span style='color:#0055ff;'>AFFE_MODELE</span></b>(<b><span style='color:#0055ff;'>AFFE</span></b><b>=</b>(
+                        <b>_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'STRUC_2D'</span></b>,),
+                            <b><span style='color:#0055ff;'>MODELISATION</span></b><b>=</b><b><span style='color:#bf0303;'>'DKT'</span></b>,
+                            <b><span style='color:#0055ff;'>PHENOMENE</span></b><b>=</b><b><span style='color:#bf0303;'>'MECANIQUE'</span></b>)),
+                    <b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>MAIL),
+
+<b><span style='color:#00aa00;'>#### ASSIGN A MATERIAL  ####</span></b>
+CHMAT<b>=</b><b><span style='color:#0055ff;'>AFFE_MATERIAU</span></b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>MAIL,
+                    <b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>Model,
+                    <b><span style='color:#0055ff;'>AFFE</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'STRUC_2D'</span></b>,),
+                            <b><span style='color:#0055ff;'>MATER</span></b><b>=</b>ACIER,),),)<b>;</b>
+
+<b><span style='color:#00aa00;'>#### DEFINING THE THICKNESS OF THE TANK ####</span></b>
+ShllProp<b>=</b><b><span style='color:#0055ff;'>AFFE_CARA_ELEM</span></b>(<b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>Model,
+                        <b><span style='color:#0055ff;'>COQUE</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'STRUC_2D'</span></b>,),
+                                <b><span style='color:#0055ff;'>EPAIS</span></b><b>=</b><b><span style='color:#b08000;'>0.05</span></b>,
+                                COEF_RIGI_DRZ<b>=</b><b><span style='color:#b08000;'>1</span></b>e<b>-</b><b><span style='color:#b08000;'>05</span></b>,),)<b>;</b>
+
+<b><span style='color:#00aa00;'>#### CALCULATING THE TOTAL MASS OF THE TANK - NO WATER HERE </span></b>
+TABL_MAS <b>=</b> <b><span style='color:#0055ff;'>POST_ELEM</span></b>(<b><span style='color:#0055ff;'>CARA_ELEM</span></b><b>=</b>ShllProp,
+                    <b><span style='color:#0055ff;'>CHAM_MATER</span></b><b>=</b>CHMAT,
+                    <b><span style='color:#0055ff;'>MASS_INER</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'STRUC_2D'</span></b>,)),
+                    <b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>Model),
+
+
+<b><span style='color:#00aa00;'>#### BOUNDARY CONDITIONS - BASE FULLY ANCHORED #### </span></b>
+BLOCAGE<b>=</b><b><span style='color:#0055ff;'>AFFE_CHAR_MECA</span></b>(<b><span style='color:#0055ff;'>DDL_IMPO</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>DRX</span></b><b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    <b><span style='color:#0055ff;'>DRY</span></b><b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    <b><span style='color:#0055ff;'>DRZ</span></b><b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    <b><span style='color:#0055ff;'>DX</span></b><b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    <b><span style='color:#0055ff;'>DY</span></b><b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    <b><span style='color:#0055ff;'>DZ</span></b><b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    <b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'BOTTOM'</span></b>))),
+                        PESANTEUR<b>=_F</b>(GRAVITE<b>=</b><b><span style='color:#b08000;'>9.81</span></b>,
+                                    DIRECTION<b>=</b>(<b><span style='color:#b08000;'>0</span></b>,<b><span style='color:#b08000;'>0</span></b>,<b>-</b><b><span style='color:#b08000;'>1</span></b>,),),
+                        <b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>Model)
+
+<b><span style='color:#00aa00;'>#### CALCULATING AND ASSEMBLY ELEMENT MATRICES #### </span></b>
+<b><span style='color:#0055ff;'>ASSEMBLAGE</span></b>(<b><span style='color:#0055ff;'>CARA_ELEM</span></b><b>=</b>ShllProp,
+        <b><span style='color:#0055ff;'>CHAM_MATER</span></b><b>=</b>CHMAT,
+        <b><span style='color:#0055ff;'>CHARGE</span></b><b>=</b>BLOCAGE,
+        <b><span style='color:#0055ff;'>MATR_ASSE</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>MATRICE</span></b><b>=</b>CO(<b><span style='color:#bf0303;'>'MAT_K'</span></b>),
+                        <b><span style='color:#0055ff;'>OPTION</span></b><b>=</b><b><span style='color:#bf0303;'>'RIGI_MECA'</span></b>),
+                    <b>_F</b>(<b><span style='color:#0055ff;'>MATRICE</span></b><b>=</b>CO(<b><span style='color:#bf0303;'>'MAT_M'</span></b>),
+                        <b><span style='color:#0055ff;'>OPTION</span></b><b>=</b><b><span style='color:#bf0303;'>'MASS_MECA'</span></b>)),
+        <b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>Model,
+        <b><span style='color:#0055ff;'>NUME_DDL</span></b><b>=</b>CO(<b><span style='color:#bf0303;'>'NDDL'</span></b>))
+
+<b><span style='color:#00aa00;'>#### CALCULATING THE NUMBER OF NORMAL MODES RANGING BETWEEN 0 AND 170 #### </span></b>
+f_table <b>=</b> INFO_MODE(<b><span style='color:#0055ff;'>MATR_RIGI</span></b> <b>=</b> MAT_K, <b><span style='color:#0055ff;'>MATR_MASS</span></b> <b>=</b> MAT_M, <b><span style='color:#0055ff;'>FREQ</span></b> <b>=</b> (<b><span style='color:#b08000;'>0</span></b>,<b><span style='color:#b08000;'>170</span></b>)),
+
+<b><span style='color:#00aa00;'>#### PRINTING TOTAL MASS AND THE NUMBER OF MODES ####</span></b>
+<b><span style='color:#0055ff;'>IMPR_TABLE</span></b>(<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>11</span></b>, <b><span style='color:#0055ff;'>TABLE</span></b><b>=</b> f_table)
+<b><span style='color:#0055ff;'>IMPR_TABLE</span></b>(<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>12</span></b>, <b><span style='color:#0055ff;'>TABLE</span></b><b>=</b> TABL_MAS)
+
+
+<b><span style='color:#00aa00;'>#### CALCULATING THE NORMAL MODES FOR THE EMPTY CASE ####</span></b>
+EMPTY_MO<b>=</b> <b><span style='color:#0055ff;'>CALC_MODES</span></b>(<b><span style='color:#0055ff;'>OPTION</span></b> <b>=</b> <b><span style='color:#bf0303;'>'BANDE'</span></b>,
+                    <b><span style='color:#0055ff;'>CALC_FREQ</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>FREQ</span></b><b>=</b>(<b><span style='color:#b08000;'>0</span></b>,<b><span style='color:#b08000;'>150</span></b>),
+                                PREC_SHIFT <b>=</b> <b><span style='color:#b08000;'>5.E-3</span></b>),
+                <b><span style='color:#0055ff;'>MATR_MASS</span></b><b>=</b>MAT_M,
+                <b><span style='color:#0055ff;'>MATR_RIGI</span></b><b>=</b>MAT_K,
+                NORM_MODE<b>=_F</b>(<b><span style='color:#0055ff;'>INFO</span></b><b>=</b><b><span style='color:#b08000;'>1</span></b>,
+                                NORME<b>=</b><b><span style='color:#bf0303;'>'MASS_GENE'</span></b>),
+                SOLVEUR_MODAL<b>=_F</b>(<b><span style='color:#0055ff;'>METHODE</span></b><b>=</b><b><span style='color:#bf0303;'>'SORENSEN'</span></b>),
+                VERI_MODE<b>=_F</b>(STOP_ERREUR<b>=</b><b><span style='color:#bf0303;'>'NON'</span></b>,
+                                STURM<b>=</b><b><span style='color:#bf0303;'>'NON'</span></b>))
+
+<b><span style='color:#00aa00;'>#### DEFINING THE POSITION OF EACH DEGREE OF FREEDOM IN THE GLOBAL MATRIX ####  </span></b>
+numgen <b>=</b> NUME_DDL_GENE(BASE<b>=</b>EMPTY_MO,
+                    STOCKAGE<b>=</b><b><span style='color:#bf0303;'>'PLEIN'</span></b>)
+
+
+<b><span style='color:#00aa00;'>#### CALCULATING THE MASS MATRIX FOR THE FLUID ####                        </span></b>
+MACRO_MATR_AJOU(<b><span style='color:#0055ff;'>DDL_IMPO</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>GROUP_NO</span></b><b>=</b><b><span style='color:#bf0303;'>'FREE_NO'</span></b>,
+                            PRES_FLUIDE<b>=</b><b><span style='color:#b08000;'>0.0</span></b>),
+                FLUIDE<b>=_F</b>(<b><span style='color:#0055ff;'>RHO</span></b><b>=</b><b><span style='color:#b08000;'>1000.0</span></b>),
+                GROUP_MA_FLUIDE<b>=</b><b><span style='color:#bf0303;'>'VOL'</span></b>,
+                GROUP_MA_INTERF<b>=</b>(<b><span style='color:#bf0303;'>'STRUC_2D'</span></b>),
+                <b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>MAIL,
+                MATR_MASS_AJOU<b>=</b>CO(<b><span style='color:#bf0303;'>'MASS_FLU'</span></b>),
+                <b><span style='color:#0055ff;'>MODELISATION</span></b><b>=</b><b><span style='color:#bf0303;'>'3D'</span></b>,
+                MODE_MECA<b>=</b>EMPTY_MO,
+                NUME_DDL_GENE<b>=</b>numgen)
+
+
+<b><span style='color:#00aa00;'>#### PROJECTING THE MASS AND STIFFNESS MATRICES ON THE NORMAL MODES FOR THE EMPTY CASE ####</span></b>
+mgene <b>=</b> PROJ_MATR_BASE(BASE<b>=</b>EMPTY_MO,
+                    <b><span style='color:#0055ff;'>MATR_ASSE</span></b><b>=</b>MAT_M,
+                    NUME_DDL_GENE<b>=</b>numgen)
+
+riggen <b>=</b> PROJ_MATR_BASE(BASE<b>=</b>EMPTY_MO,
+                        <b><span style='color:#0055ff;'>MATR_ASSE</span></b><b>=</b>MAT_K,
+                        NUME_DDL_GENE<b>=</b>numgen)
+
+<b><span style='color:#00aa00;'>#### COMBINING THE GENERALIZED MASS AND STIFNESS MATRICES  ####  </span></b>
+mastot <b>=</b> COMB_MATR_ASSE(COMB_R<b>=</b>(<b>_F</b>(COEF_R<b>=</b><b><span style='color:#b08000;'>1.0</span></b>,
+                                <b><span style='color:#0055ff;'>MATR_ASSE</span></b><b>=</b>MASS_FLU),
+                                <b>_F</b>(COEF_R<b>=</b><b><span style='color:#b08000;'>1.0</span></b>,
+                                <b><span style='color:#0055ff;'>MATR_ASSE</span></b><b>=</b>mgene)))
+
+<b><span style='color:#00aa00;'>#### CALCULATING WET NORMAL MODES #### </span></b>
+FULL_MO <b>=</b> <b><span style='color:#0055ff;'>CALC_MODES</span></b>(<b><span style='color:#0055ff;'>CALC_FREQ</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>FREQ</span></b><b>=</b>(<b><span style='color:#b08000;'>0</span></b>,<b><span style='color:#b08000;'>150</span></b>)),
+                    <b><span style='color:#0055ff;'>MATR_MASS</span></b><b>=</b>mastot,
+                    <b><span style='color:#0055ff;'>MATR_RIGI</span></b><b>=</b>riggen,
+                    <b><span style='color:#0055ff;'>OPTION</span></b><b>=</b><b><span style='color:#bf0303;'>'BANDE'</span></b>)
+
+WET_MODE <b>=</b> REST_GENE_PHYS(
+                        RESU_GENE<b>=</b>FULL_MO,
+                        TOUT_CHAM<b>=</b><b><span style='color:#bf0303;'>'OUI'</span></b>)
+
+<b><span style='color:#00aa00;'>#OUTPUT RESULTS </span></b>
+<b><span style='color:#0055ff;'>IMPR_RESU</span></b>(<b><span style='color:#0055ff;'>FORMAT</span></b><b>=</b><b><span style='color:#bf0303;'>'MED'</span></b>,<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>80</span></b>,
+        <b><span style='color:#0055ff;'>RESU</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b>EMPTY_MO,
+                TOUT_CHAM<b>=</b><b><span style='color:#bf0303;'>'OUI'</span></b>,),)<b>;</b>
+
+<b><span style='color:#0055ff;'>IMPR_RESU</span></b>(<b><span style='color:#0055ff;'>FORMAT</span></b><b>=</b><b><span style='color:#bf0303;'>'RESULTAT'</span></b>,<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>13</span></b>,
+        <b><span style='color:#0055ff;'>RESU</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b>WET_MODE,
+                <b><span style='color:#0055ff;'>NOM_PARA</span></b> <b>=</b> (<b><span style='color:#bf0303;'>'FREQ'</span></b>,)),))<b>;</b>
+
+<b><span style='color:#0055ff;'>IMPR_RESU</span></b>(<b><span style='color:#0055ff;'>FORMAT</span></b><b>=</b><b><span style='color:#bf0303;'>'RESULTAT'</span></b>,<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>14</span></b>,
+        <b><span style='color:#0055ff;'>RESU</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b>EMPTY_MO,
+                <b><span style='color:#0055ff;'>NOM_PARA</span></b> <b>=</b> (<b><span style='color:#bf0303;'>'FREQ'</span></b>,))))<b>;</b>
+
+<b><span style='color:#0055ff;'>FIN</span></b>()<b>;</b>
+</pre>
+</body>
+</html></div>
+<div class="section" id="results">
+<h3>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
+<p>The below figure shows the natural frequencies for the empty and full cases from Aster.</p>
+<div class="figure align-default">
+<img alt="../../_images/1-modes-results.png" src="../../_images/1-modes-results.png" />
+</div>
+<p>Due to the symmetry of the model, we have coupled modes ( 1-2, 3-4,5-6…) which are modes with the same frequency but rotated about the symmetry axis. The below figure clarifies.</p>
+<div class="figure align-default">
+<img alt="../../_images/coupled-modes.png" src="../../_images/coupled-modes.png" />
+</div>
+<p>And the total mass of the empty model.</p>
+<div class="figure align-default">
+<img alt="../../_images/empty-mass.png" src="../../_images/empty-mass.png" />
+</div>
+</div>
+<div class="section" id="conclusions">
+<h3>Conclusions<a class="headerlink" href="#conclusions" title="Permalink to this headline">¶</a></h3>
+<p>The natural frequencies between Aster and Ansys are almost the same, the biggest difference occurs in the 5th wet mode (101.79 in Ansys and 104.9 Aster, 3% difference).
+Thus, the .comm file is validated.</p>
+</div>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<p>[1] Dynamic Analysis of Liquid Storage Tank Using FE Method and Results Comparison with Analytical Models, Miloš Musil1, Martin Sivý2.</p>
+</div>
+<div class="section" id="files">
+<h3>Files<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/igor-barcelos/deepmech.git">https://github.com/igor-barcelos/deepmech.git</a></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../CA.1-Pantheon-Rome/CA.1-Pantheon-Rome.html" class="btn btn-neutral float-left" title="Dome analysis : Pantheon of Rome" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Igor.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

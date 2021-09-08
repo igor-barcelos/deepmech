@@ -1,0 +1,245 @@
+Dome analysis : Pantheon of Rome
+================================
+
+Overview
+---------------------
+
+From a global point of view, this application presents one of many ways of how curved structures can be analyzed with Code_Aster. More precisely, this model makes a principal stress analysis of the Pantheon's dome. The results are compared with Morer and Goñi [1].  
+
+Geometry and Mesh
+-----------------------------
+
+The Pantheon's dome consists of a hemisphere with an interior radius of 21.81 m and a thickness of 1.5 m. At the top, there is an opening with a radius equal to 4.5 m. 
+The mesh contains QUAD9 elements.
+
+Properties of material
+--------------------------------
+
+The isotropic elastic material is characterized by the following properties:
+
+* Young Modulus = 2.9E9 Pa
+*  Poisson's ratio = 0.2
+* Unit weight = 1350 kg/m3 
+
+Boundary conditions
+------------------------------
+
+It is assumed that the base of the dome is supported only against vertical loading.( DZ = 0, GROUP_MA = 'BOTTOM')
+The displacement in the other orthogonal directions ( DX and DY) is restrained in two other nodes. 
+Only the self-weight is considered. 
+
+Reference solution
+--------------------------------
+
+Morer and Goñi [1] provide the internal hoop and meridional stress at the base of the dome, such as : 
+
+* Max. Hoop = 2.2E5 Pa 
+* Min. Meridional = -2.9E5 Pa 
+
+The vertical reaction at the bottom can be calculated considering the dome's volume, which leads to 4πR²tρg = 6.3E7 N (not considering the opening at the top) 
+
+FEA Approach: Code_Aster
+-----------------------------------------
+
+.. raw:: html
+    
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+    <title>pantheon_dome.comm</title>
+    </head>
+    <!-- Highlighting: "Code_Aster" -->
+    <body>
+    <pre style='font-weight:bold;color:#000000;background-color:#ffffff;'>
+    <b><span style='color:#00aa00;'># -*- coding: utf-8 -*-</span></b>
+    <span style='color:#924c9d;'>import</span> numpy <span style='color:#924c9d;'>as</span> np
+    
+    <b><span style='color:#00aa00;'>############################################ </span></b>
+    
+        <b><span style='color:#00aa00;'># DOME ANALYSIS : PANTHEON OF ROME #  </span></b>
+    
+    <b><span style='color:#00aa00;'>############################################</span></b>
+    
+    <b><span style='color:#00aa00;'>#### READING MESH IN ASTER FORMAT #### </span></b>
+    <b><span style='color:#0055ff;'>DEBUT</span></b>(PAR_LOT <b>=</b><b><span style='color:#bf0303;'>'NON'</span></b>,)<b>;</b>
+    
+    MAIL<b>=</b><b><span style='color:#0055ff;'>LIRE_MAILLAGE</span></b>(
+        <b><span style='color:#0055ff;'>INFO</span></b><b>=</b><b><span style='color:#b08000;'>1</span></b>,
+        <b><span style='color:#0055ff;'>UNITE</span></b><b>=</b><b><span style='color:#b08000;'>20</span></b>,
+        <b><span style='color:#0055ff;'>FORMAT</span></b><b>=</b><b><span style='color:#bf0303;'>'MED'</span></b>,
+        VERI_MAIL <b>=</b> <b>_F</b>(VERIF<b>=</b> <b><span style='color:#bf0303;'>'NON'</span></b>))<b>;</b>
+    
+    <b><span style='color:#00aa00;'>### CREATING MESH GROUPS  #### </span></b>
+    MAIL <b>=</b> <b><span style='color:#0055ff;'>DEFI_GROUP</span></b>(<b><span style='color:#0055ff;'>reuse</span></b> <b>=</b> MAIL,
+             <b><span style='color:#0055ff;'>MAILLAGE</span></b> <b>=</b> MAIL, 
+             <b><span style='color:#0055ff;'>CREA_GROUP_MA</span></b> <b>=</b> (<b>_F</b>(<b><span style='color:#0055ff;'>NOM</span></b> <b>=</b> <b><span style='color:#bf0303;'>'DOME'</span></b>,<b><span style='color:#0055ff;'>TOUT</span></b> <b>=</b> <b><span style='color:#bf0303;'>'OUI'</span></b>),
+                             <b>_F</b>(<b><span style='color:#0055ff;'>NOM</span></b> <b>=</b> <b><span style='color:#bf0303;'>'QUAD'</span></b>, <b><span style='color:#0055ff;'>TOUT</span></b> <b>=</b> <b><span style='color:#bf0303;'>'OUI'</span></b>, TYPE_MAILLE  <b>=</b> <b><span style='color:#bf0303;'>'QUAD4'</span></b>,)),
+             <b><span style='color:#0055ff;'>CREA_GROUP_NO</span></b> <b>=</b> (<b>_F</b>(TOUT_GROUP_MA <b>=</b>  <b><span style='color:#bf0303;'>'OUI'</span></b>)))
+    
+    <b><span style='color:#00aa00;'>### CHECKING IF THE NORMAL VECTORS ARE ORIENTED CORRECTLY ####</span></b>
+    MAIL<b>=</b> <b><span style='color:#0055ff;'>MODI_MAILLAGE</span></b>(<b><span style='color:#0055ff;'>reuse</span></b> <b>=</b> MAIL,
+                        <b><span style='color:#0055ff;'>MAILLAGE</span></b> <b>=</b> MAIL,
+                        ORIE_NORM_COQUE <b>=</b> <b>_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b> <b><span style='color:#bf0303;'>'QUAD'</span></b>)),    
+                        
+    <b><span style='color:#00aa00;'>### CREATING A QUAD9 MESH ####</span></b>
+        <b><span style='color:#00aa00;'>### PASSING FROM LINEAR TO QUAD8 ELEMENTS ###</span></b>
+    MeshQuad<b>=</b><b><span style='color:#0055ff;'>CREA_MAILLAGE</span></b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>MAIL,
+                           LINE_QUAD<b>=_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'DOME'</span></b>,),
+                                        <b><span style='color:#00aa00;'>#TOUT='OUI',</span></b>
+                                        PREF_NOEUD<b>=</b><b><span style='color:#bf0303;'>'NQ'</span></b>,),)<b>;</b>
+                                        
+        <b><span style='color:#00aa00;'>### PASSING FROM QUAD8 TO QUAD9 ###                      </span></b>
+    Mesh<b>=</b><b><span style='color:#0055ff;'>CREA_MAILLAGE</span></b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>MeshQuad,
+                       MODI_MAILLE<b>=_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b><b><span style='color:#bf0303;'>'DOME'</span></b>,
+                                        <b><span style='color:#0055ff;'>OPTION</span></b><b>=</b><b><span style='color:#bf0303;'>'QUAD8_9'</span></b>,
+                                        PREF_NOEUD<b>=</b><b><span style='color:#bf0303;'>'NT'</span></b>
+                                        ),)<b>;</b>
+                                        
+    <b><span style='color:#00aa00;'>### CREATING A FE MODEL FOR A MECHANICAL PROBLEM USING COQUE_3D  ###</span></b>
+    MO<b>=</b><b><span style='color:#0055ff;'>AFFE_MODELE</span></b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>Mesh,
+                   <b><span style='color:#0055ff;'>INFO</span></b><b>=</b><b><span style='color:#b08000;'>1</span></b>,
+                   <b><span style='color:#0055ff;'>AFFE</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>TOUT</span></b><b>=</b><b><span style='color:#bf0303;'>'OUI'</span></b>,<b><span style='color:#0055ff;'>PHENOMENE</span></b><b>=</b><b><span style='color:#bf0303;'>'MECANIQUE'</span></b>,<b><span style='color:#0055ff;'>MODELISATION</span></b><b>=</b><b><span style='color:#bf0303;'>'COQUE_3D'</span></b>,))),
+    
+    <b><span style='color:#00aa00;'>### CREATING / ASSIGN A MATERIAL ####</span></b>
+    BETON<b>=</b><b><span style='color:#0055ff;'>DEFI_MATERIAU</span></b>(<b><span style='color:#0055ff;'>ELAS</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>E</span></b><b>=</b><b><span style='color:#b08000;'>2.9E9</span></b>,
+                                  <b><span style='color:#0055ff;'>NU</span></b><b>=</b><b><span style='color:#b08000;'>0.2</span></b>,
+                                  <b><span style='color:#0055ff;'>RHO</span></b><b>=</b><b><span style='color:#b08000;'>1350</span></b>),)
+    
+    
+    <b><span style='color:#0055ff;'>MATER</span></b><b>=</b><b><span style='color:#0055ff;'>AFFE_MATERIAU</span></b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b>Mesh,
+                        <b><span style='color:#0055ff;'>AFFE</span></b><b>=</b>(
+                              <b>_F</b>(<b><span style='color:#0055ff;'>TOUT</span></b><b>=</b><b><span style='color:#bf0303;'>'OUI'</span></b>,
+                                 <b><span style='color:#0055ff;'>MATER</span></b><b>=</b>BETON,),),)
+    
+    <b><span style='color:#00aa00;'>### DEFINING THE DOME'S THICKNESS ###</span></b>
+    CAEL<b>=</b><b><span style='color:#0055ff;'>AFFE_CARA_ELEM</span></b>(<b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>MO,
+                        <b><span style='color:#0055ff;'>COQUE</span></b> <b>=</b> (<b>_F</b>(<b><span style='color:#0055ff;'>EPAIS</span></b> <b>=</b> <b><span style='color:#b08000;'>1.5</span></b>,
+                                    <b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b> <b><span style='color:#bf0303;'>'DOME'</span></b>,)),),
+    
+    <b><span style='color:#00aa00;'>### BOUNDARY CONDITIONS AND LOADINGS ###</span></b>
+    COND_0<b>=</b><b><span style='color:#0055ff;'>AFFE_CHAR_MECA</span></b>(<b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>MO,
+                          <b><span style='color:#0055ff;'>DDL_IMPO</span></b><b>=</b>(<b>_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b>(<b><span style='color:#bf0303;'>'BOTTOM'</span></b>,),
+                                       <b><span style='color:#0055ff;'>DZ</span></b> <b>=</b><b><span style='color:#b08000;'>0</span></b>,), <b><span style='color:#00aa00;'>## VERTICAL DISPLACEMENT AT THE BOTTOM NODES</span></b>
+                                    <b>_F</b>(<b><span style='color:#0055ff;'>GROUP_NO</span></b><b>=</b>(<b><span style='color:#bf0303;'>'N_RIGHT'</span></b>,),
+                                       <b><span style='color:#0055ff;'>DX</span></b> <b>=</b><b><span style='color:#b08000;'>0</span></b>),
+                                    <b>_F</b>(<b><span style='color:#0055ff;'>GROUP_NO</span></b><b>=</b>(<b><span style='color:#bf0303;'>'N_UPPER'</span></b>,),
+                                       <b><span style='color:#0055ff;'>DY</span></b> <b>=</b><b><span style='color:#b08000;'>0</span></b>)),
+                         PESANTEUR<b>=_F</b>(DIRECTION <b>=</b>(<b><span style='color:#b08000;'>0</span></b>,<b><span style='color:#b08000;'>0</span></b>,<b>-</b><b><span style='color:#b08000;'>1</span></b>), GRAVITE <b>=</b> <b><span style='color:#b08000;'>9.8</span></b>,)), <b><span style='color:#00aa00;'>## SELF WEIGHT</span></b>
+    
+    <b><span style='color:#00aa00;'>### SOLVING THE PROBLEM ###</span></b>
+    <b><span style='color:#0055ff;'>RESU</span></b> <b>=</b> <b><span style='color:#0055ff;'>MECA_STATIQUE</span></b>(<b><span style='color:#0055ff;'>MODELE</span></b><b>=</b>MO,
+                        <b><span style='color:#0055ff;'>CHAM_MATER</span></b><b>=</b><b><span style='color:#0055ff;'>MATER</span></b>,
+                        <b><span style='color:#0055ff;'>CARA_ELEM</span></b><b>=</b>CAEL,
+                        <b><span style='color:#0055ff;'>EXCIT</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>CHARGE</span></b><b>=</b>COND_0,
+                                TYPE_CHARGE<b>=</b><b><span style='color:#bf0303;'>'FIXE_CSTE'</span></b>,),
+                        <b><span style='color:#0055ff;'>OPTION</span></b><b>=</b><b><span style='color:#bf0303;'>'SIEF_ELGA'</span></b>,
+                        <b><span style='color:#0055ff;'>SOLVEUR</span></b><b>=_F</b>(RENUM<b>=</b><b><span style='color:#bf0303;'>'AUTO'</span></b>,
+                                    NPREC<b>=</b><b><span style='color:#b08000;'>8</span></b>,
+                                    ELIM_LAGR<b>=</b><b><span style='color:#bf0303;'>'LAGR2'</span></b>,
+                                    STOP_SINGULIER<b>=</b><b><span style='color:#bf0303;'>'OUI'</span></b>,
+                                    TYPE_RESOL<b>=</b><b><span style='color:#bf0303;'>'AUTO'</span></b>,
+                                    ACCELERATION<b>=</b><b><span style='color:#bf0303;'>'AUTO'</span></b>,
+                                    LOW_RANK_SEUIL<b>=</b><b><span style='color:#b08000;'>0.0</span></b>,
+                                    PRETRAITEMENTS<b>=</b><b><span style='color:#bf0303;'>'AUTO'</span></b>,
+                                    POSTTRAITEMENTS<b>=</b><b><span style='color:#bf0303;'>'AUTO'</span></b>,
+                                    PCENT_PIVOT<b>=</b><b><span style='color:#b08000;'>20</span></b>,
+                                    RESI_RELA<b>=</b><b><span style='color:#b08000;'>4.E-06</span></b>,
+                                    GESTION_MEMOIRE<b>=</b><b><span style='color:#bf0303;'>'AUTO'</span></b>,
+                                    MATR_DISTRIBUEE<b>=</b><b><span style='color:#bf0303;'>'NON'</span></b>,
+                                    <b><span style='color:#0055ff;'>METHODE</span></b><b>=</b><b><span style='color:#bf0303;'>'MUMPS'</span></b>,),
+                        <b><span style='color:#0055ff;'>INFO</span></b><b>=</b><b><span style='color:#b08000;'>1</span></b>,)
+                            
+    <b><span style='color:#00aa00;'>### POST PROCESSING THE RESULTS ###</span></b>
+    <b><span style='color:#0055ff;'>RESU</span></b><b>=</b><b><span style='color:#0055ff;'>CALC_CHAMP</span></b>(<b><span style='color:#0055ff;'>reuse</span></b> <b>=</b><b><span style='color:#0055ff;'>RESU</span></b>,
+                    <b><span style='color:#0055ff;'>MODELE</span></b> <b>=</b> MO,
+                    <b><span style='color:#0055ff;'>RESULTAT</span></b> <b>=</b><b><span style='color:#0055ff;'>RESU</span></b>,
+                    <b><span style='color:#0055ff;'>CONTRAINTE</span></b> <b>=</b> (<b><span style='color:#bf0303;'>'SIGM_ELNO'</span></b>,<b><span style='color:#bf0303;'>'SIGM_ELGA'</span></b>),
+                    FORCE <b>=</b> (<b><span style='color:#bf0303;'>'REAC_NODA'</span></b>),),
+                    
+    <b><span style='color:#00aa00;'>### CALCULATING THE VERTICAL REACTION AT THE BOTTOM ###                </span></b>
+    REAC <b>=</b><b><span style='color:#0055ff;'>POST_RELEVE_T</span></b>(
+                        <b><span style='color:#0055ff;'>ACTION</span></b><b>=</b>(<b>_F</b>(
+                                <b><span style='color:#0055ff;'>INTITULE</span></b><b>=</b> <b><span style='color:#bf0303;'>'BOTTOM REACTIONS'</span></b>,
+                                <b><span style='color:#0055ff;'>GROUP_NO</span></b><b>=</b> <b><span style='color:#bf0303;'>'BOTTOM'</span></b>,
+                                <b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b> <b><span style='color:#0055ff;'>RESU</span></b>,
+                                <b><span style='color:#0055ff;'>NOM_CHAM</span></b><b>=</b><b><span style='color:#bf0303;'>'REAC_NODA'</span></b>,
+                                <b><span style='color:#0055ff;'>TOUT_ORDRE</span></b><b>=</b><b><span style='color:#bf0303;'>'OUI'</span></b>,
+                                <b><span style='color:#0055ff;'>RESULTANTE</span></b><b>=</b> (<b><span style='color:#bf0303;'>'DZ'</span></b> ) ,
+                                <b><span style='color:#0055ff;'>OPERATION</span></b><b>=</b><b><span style='color:#bf0303;'>'EXTRACTION'</span></b>,)))<b>;</b>
+                    
+    <b><span style='color:#00aa00;'>### POST PROCESSING THE STRESS RESULTS ###                 </span></b>
+    stat2<b>=</b><b><span style='color:#0055ff;'>POST_CHAMP</span></b>(
+                        <b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b><b><span style='color:#0055ff;'>RESU</span></b> ,
+                        <b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b> (<b><span style='color:#bf0303;'>'DOME'</span></b> , ) ,
+                        EXTR_COQUE<b>=_F</b>(
+                        NUME_COUCHE<b>=</b><b><span style='color:#b08000;'>1</span></b> ,
+                        NIVE_COUCHE<b>=</b><b><span style='color:#bf0303;'>'SUP'</span></b> ,
+                        <b><span style='color:#0055ff;'>NOM_CHAM</span></b><b>=</b> (<b><span style='color:#bf0303;'>'SIGM_ELNO'</span></b>,<b><span style='color:#bf0303;'>'SIGM_ELGA'</span></b>,)),)<b>;</b>
+                
+                        
+    statsup<b>=</b><b><span style='color:#0055ff;'>CALC_CHAMP</span></b>(
+                    <b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b>stat2 ,
+                    <b><span style='color:#0055ff;'>GROUP_MA</span></b><b>=</b> (<b><span style='color:#bf0303;'>'DOME'</span></b>,) ,
+                    <b><span style='color:#0055ff;'>CRITERES</span></b><b>=</b> (<b><span style='color:#bf0303;'>'SIEQ_NOEU'</span></b>,<b><span style='color:#bf0303;'>'SIEQ_ELNO'</span></b>,<b><span style='color:#bf0303;'>'SIEQ_ELGA'</span></b>),) <b>;</b>
+    
+    <b><span style='color:#00aa00;'>### PRINTING PRINCIPAL STRESSES IN MED FORMAT ###              </span></b>
+    <b><span style='color:#0055ff;'>IMPR_RESU</span></b>(<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>11</span></b>, 
+              <b><span style='color:#0055ff;'>FORMAT</span></b> <b>=</b> <b><span style='color:#bf0303;'>'MED'</span></b>,
+              <b><span style='color:#0055ff;'>RESU</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>GROUP_MA</span></b> <b>=</b> <b><span style='color:#bf0303;'>'DOME'</span></b>,
+              <b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b> statsup,
+              <b><span style='color:#0055ff;'>NOM_CHAM</span></b> <b>=</b> (<b><span style='color:#bf0303;'>'SIEQ_ELNO'</span></b>,<b><span style='color:#bf0303;'>'SIEQ_ELGA'</span></b>))),
+    
+    
+    <b><span style='color:#00aa00;'>### PRINTING GENERAL STRESSES IN RESU FORMAT ###</span></b>
+    <b><span style='color:#0055ff;'>IMPR_RESU</span></b>(<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>13</span></b>, 
+              <b><span style='color:#0055ff;'>FORMAT</span></b> <b>=</b> <b><span style='color:#bf0303;'>'RESULTAT'</span></b>,
+              <b><span style='color:#0055ff;'>RESU</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b> MAIL,
+                      <b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b> stat2,
+                      <b><span style='color:#0055ff;'>NOM_CHAM</span></b> <b>=</b> <b><span style='color:#bf0303;'>'SIGM_ELGA'</span></b>, 
+                      <b><span style='color:#0055ff;'>GROUP_NO</span></b> <b>=</b><b><span style='color:#bf0303;'>'DOME'</span></b>),),
+    
+    
+    <b><span style='color:#00aa00;'>### PRINTING PRINCIPAL STRESSES IN RESU FORMAT ###</span></b>
+    <b><span style='color:#0055ff;'>IMPR_RESU</span></b>(<b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>14</span></b>, 
+              <b><span style='color:#0055ff;'>FORMAT</span></b> <b>=</b> <b><span style='color:#bf0303;'>'RESULTAT'</span></b>,
+              <b><span style='color:#0055ff;'>RESU</span></b><b>=_F</b>(<b><span style='color:#0055ff;'>MAILLAGE</span></b><b>=</b> MAIL,
+                    <b><span style='color:#0055ff;'>RESULTAT</span></b><b>=</b> statsup,
+                    <b><span style='color:#0055ff;'>NOM_CHAM</span></b> <b>=</b> <b><span style='color:#bf0303;'>'SIEQ_ELGA'</span></b>, 
+                    <b><span style='color:#0055ff;'>GROUP_NO</span></b> <b>=</b><b><span style='color:#bf0303;'>'DOME'</span></b>, 
+                    <b><span style='color:#0055ff;'>NOM_CMP</span></b> <b>=</b>(<b><span style='color:#bf0303;'>'PRIN_1'</span></b>,<b><span style='color:#bf0303;'>'PRIN_2'</span></b>, <b><span style='color:#bf0303;'>'PRIN_3'</span></b>)),),
+    
+    
+    <b><span style='color:#00aa00;'>### PRINTING VERTICAL REACTION AT THE BOTTOM ###</span></b>
+    <b><span style='color:#0055ff;'>IMPR_TABLE</span></b> (<b><span style='color:#0055ff;'>TABLE</span></b><b>=</b>REAC, <b><span style='color:#0055ff;'>UNITE</span></b> <b>=</b> <b><span style='color:#b08000;'>15</span></b>, <b><span style='color:#0055ff;'>FORMAT</span></b> <b>=</b> <b><span style='color:#bf0303;'>'TABLEAU'</span></b>,),
+    
+    
+    <b><span style='color:#0055ff;'>FIN</span></b>()<b>;</b>
+    
+    
+    </pre>
+    </body>
+    </html>
+
+Results
+-----------------
+
+
+Conclusions
+----------------
+
+In this application it is possible to visualize the common structural behavior of domes. Hoop forces (tension) are higher at the base and meridional (compression) forces also increase from the crown to the base. 
+The results agree reasonably well with the ones proposed by Morer and Goñi [1]. 
+Vertical reaction at the base matches with the analytical value.
+
+References
+-----------------
+
+Morer, P. e Goñi, R. 2008. A benchmarking study of the analysis of non-reinforced structures applied to the structural behavior of domes. [autor do livro] Dina D'Ayala e Enrico Fodde. Structural Analysis of Historic Construction. Londres : Taylor & Francis Group, 2008, pp. 705-713.
+
+Files
+-----------------
+
+
