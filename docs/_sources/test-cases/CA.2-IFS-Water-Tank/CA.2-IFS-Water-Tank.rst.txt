@@ -1,10 +1,10 @@
-Modal analysis of water tank 
+IFS - Modal analysis of water tank 
 ================================
 
 Overview
 ---------------------
 
-This test calculates the wet modes of a water tank using the added mass concept. Example 1 is reproduction of the model presented in [1] which we can validate the .comm file and compare Code_Aster and Ansys results. Example 2 applies the same .comm file but in more complex geometry. 
+This test calculates the wet modes of a water tank using the added mass concept. Example 1 is reproduction of the model presented in [1] which we can validate the .comm file and compare Code_Aster and Ansys results. 
 
 The command file is based on FDLV114a. 
 
