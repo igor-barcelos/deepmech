@@ -269,7 +269,7 @@ The natural frequencies between Aster and Ansys are almost the same, the biggest
 Thus, the .comm file is validated. 
 
 
-
+.. figure:: all_modes_edited.png
 
 References
 ~~~~~~~~~~~~~~~~~~
